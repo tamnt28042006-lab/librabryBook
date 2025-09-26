@@ -9,6 +9,7 @@ class Book{
     int numberOfBooks;
     public:
 
+// Hàm thành phần nhập dữ liệu cho sách
     void insertBook(){
         cout<<"Nhap ten sach:";
         getline(cin,bookName);
@@ -27,6 +28,7 @@ class Book{
         cin>>numberOfBooks;
     }
 
+// Hàm hiển thị dữ liệu sách
     void display(){
         cout<<"Sach: "<<bookName
         <<" | Tac gia: "<<authorName
@@ -51,6 +53,7 @@ struct Node{
     }
 };
 
+// Hàm in tiêu đề
     void printCentered(string t, int width){
         int len = t.length();
         int left = (width-len) / 2;
@@ -73,6 +76,7 @@ class doublyLinkedList{
         head=NULL;
     }
 
+// Hàm thêm sách vào danh sách liên kết
     void insertBook(Book value){
         Node* newNode=new Node(value);
         if (head==NULL){
@@ -88,6 +92,7 @@ class doublyLinkedList{
         }
     }
 
+// In danh sách liên kết
     void display(){
         Node* temp=head;
         printCentered("Thu vien",150);
