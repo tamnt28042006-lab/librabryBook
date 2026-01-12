@@ -1,5 +1,9 @@
 #include <iostream>
 #include <ctime>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <algorithm>
 using namespace std;
 
 class Book {
@@ -40,7 +44,7 @@ public:
             return;
         }
         if(publicDate.tm_year<0){
-            cout<<"Nam khong hop le, chuong trinh se dong";
+            cout<<"Nam khong hop le, chuong trinh se dong \n";
             return;
         }
         cout << "Nhap so luong sach:";
@@ -62,14 +66,30 @@ public:
     int getPublicYear() {
         return publicDate.tm_year + 1900;
     }
+
+    void decreaseNumberOfBooks(){
+        numberOfBooks--;
+    }
+    void increaseNumberOfBooks(){
+        numberOfBooks++;
+    }
+    string getName(){
+        return bookName;
+    }
+    int getSoLuong(){
+        return numberOfBooks;
+    }
+    string getAuthorName() {
+        return authorName;
+    }
 };
 
 struct Node {
-    Book data;
+    Book *data;
     Node *prev;
     Node *next;
 
-    Node(Book value) {
+    Node(Book *value) {
         data = value;
         prev = nullptr;
         next = nullptr;
@@ -91,6 +111,77 @@ void printCentered(string t, int width) {
     cout << endl;
 }
 
+class librabryManagement {
+    unordered_map<string, Book*> hashBook;
+public:
+    Book *findBook(string bookName) {
+        if (hashBook.count(bookName)) {
+            return hashBook[bookName];
+        }
+        return nullptr;
+    }
+    void addBook(Book* b) {
+        hashBook[b->getName()] = b;
+    }
+};
+
+class Person{
+    private:
+    string name;
+    string cccd;
+    string bookName;
+    public:
+    Person(string n,string id,Book &bk){
+        name=n;
+        cccd=id;
+        bookName=bk.getName();
+        bk.decreaseNumberOfBooks();
+    }
+    void Display(){
+        cout<<"Ten:"<<name<<"|"<<"cccd:"<<cccd<<"|"<<"Thong tin sach:"<<bookName<<endl;
+    }
+    string getNameBook(){
+        return bookName;
+    }
+    string getName(){
+        return name;
+    }
+    string getId(){
+        return cccd;
+    }
+};
+
+// Hiển thị danh sách queue
+void displayQueue(queue<Person> q){
+        while(!q.empty()){
+            q.front().Display();
+            q.pop();
+        }
+    }
+ 
+//Xoá phần tử trong danh sách
+bool removeQueue(queue<Person>& q,string t,string n,string id){
+    queue<Person> temp;
+    bool found =false;
+    while(!q.empty()){
+        if(!found && q.front().getNameBook() == t && q.front().getName() ==n && q.front().getId() == id ){
+            found=true;
+            q.pop();
+            continue;
+        }else{
+            temp.push(q.front());
+        }
+        q.pop();
+    }
+    q=temp;
+    if(found){
+        cout<<"Tra sach thanh cong \n";
+    }else{
+        cout<<"Tra sach khong thanh cong \n";
+    }
+    return found;
+}
+
 class doublyLinkedList {
 private:
     Node *head;
@@ -107,7 +198,6 @@ private:
             fast = fast->next->next;
             if (fast) slow = slow->next;
         }
-
         Node* second = slow->next;  // nhánh phải
         slow->next = nullptr;       // cắt đôi
         if (second) second->prev = nullptr;
@@ -119,12 +209,11 @@ private:
         // 3. Merge hai nửa đã sort
         return merge(left, right);
     }
-
     // Gộp 2 danh sách đã sắp xếp
     Node* merge(Node* first, Node* second) {
         if (!first) return second;
         if (!second) return first;
-        if (first->data.getPublicYear() >= second->data.getPublicYear()) {
+        if (first->data->getPublicYear() >= second->data->getPublicYear()) {
             first->next = merge(first->next, second);
             if (first->next) first->next->prev = first;
             first->prev = nullptr;
@@ -138,13 +227,11 @@ private:
     }
 
 public:
-
     doublyLinkedList() {
         head = nullptr;
     }
-
     // Hàm thêm sách vào danh sách liên kết
-    void insertBookIntoDbLinkedList(Book value) {
+    void insertBookIntoDbLinkedList(Book* value) {
         Node *newNode = new Node(value);
         if (head == nullptr) {
             head = newNode;
@@ -158,6 +245,18 @@ public:
             newNode->prev = temp;
         }
     }
+    void display() {
+        Node *temp = head;
+        printCentered("Thu vien", 50);
+        while (temp != nullptr) {
+            temp->data->display();
+            temp = temp->next;
+        }
+        for (int i = 0; i < 50; i++) {
+            cout << "=";
+        }
+        cout << endl;
+    }
     int count() {
         Node *temp = head;
         int count = 0;
@@ -168,38 +267,49 @@ public:
         return count;
     }
 
-    // In danh sách liên kết
-    void display() {
-        Node *temp = head;
-        printCentered("Thu vien", 50);
-        while (temp != nullptr) {
-
-            temp->data.display();
-            temp = temp->next;
-        }
-        for (int i = 0; i < 50; i++) {
-            cout << "=";
-        }
-        cout << endl;
-    }
     void sortByPublicYear() {
         head = mergeSort(head);
     }
 };
 
+class hashTable {
+    unordered_map<string, vector<string>> searchByAuthorName;
+public:
+    void addBook(Book& book) {
+        searchByAuthorName[book.getAuthorName()].push_back(book.getName());
+    }
+    void searching(string authorName) {
+        if (searchByAuthorName.find(authorName) == searchByAuthorName.end()) {
+            cout <<"Hien khong co sach nao co ten tac gia nay.\n";
+            return;
+        }
+        cout <<"Tac gia: " << authorName <<" co tac pham la: ";
+        for (int i = 0; i < searchByAuthorName[authorName].size(); i++) {
+           cout << searchByAuthorName[authorName][i];
+            if (i != searchByAuthorName[authorName].size() - 1) {
+                cout << ", ";
+            }
+        }
+        cout << endl;
+    }
+};
+
 int main() {
     int select;
-    Book book;
     doublyLinkedList Thuvien;
+    queue<Person> Borrowlist;
+    librabryManagement lib;
+    hashTable timKiem;
     do {
         printCentered("Danh sach chuc nang", 50);
-        cout << "0: Exit. \n"
+        cout    << "0: Exit. \n"
                 << "1: Insert book. \n"
                 << "2: Borrow book. \n"
-                << "3: Return book. \n"
-                << "4. Searching: \n +)searchByAuthorName. \n +)searchByBookName.\n"
-                << "5. Sorting. \n"
-                << "6. Display. \n";
+                << "3: Display borrow book \n"
+                << "4: Return book. \n"
+                << "5. Searching by author name. \n"
+                << "6. Sorting. \n"
+                << "7. Display. \n";
         for (int i = 0; i < 50; i++) {
             cout << "=";
         }
@@ -211,16 +321,87 @@ int main() {
             }
             case 1: {
                 cin.ignore();
-                book.insertBook();
+                Book* book=new Book();
+                book->insertBook();
                 Thuvien.insertBookIntoDbLinkedList(book);
+                lib.addBook(book);
+                timKiem.addBook(*book);
                 break;
             }
-            case 5: {
+            case 2:{
+                int numberOfBooks;
+                string nBook,name,id;
+                cout<<"Nhap so sach muon muon:";
+                cin>>numberOfBooks;
+                cin.ignore();
+                cout<<"Nhap ten nguoi muon:";
+                getline(cin,name);
+                cout<<"Nhap id nguoi muon:";
+                getline(cin,id);
+                for(int i=0; i<numberOfBooks; i++){
+                cout<<"Nhap sach cho muon:";
+                getline(cin,nBook);
+                Book* found;
+                found=lib.findBook(nBook);
+                if(found){
+                    if(found->getSoLuong()>0){
+                        Borrowlist.push(Person(name,id,*found));
+                    }else{
+                        cout<<"Sach da het \n";
+                    }
+                }else{
+                    cout<<"Khong tim thay sach vui long nhap lai \n";
+                    i--;
+                }
+                }
+                break;
+            }
+            case 3:{
+                printCentered("Danh sach muon",50);
+                displayQueue(Borrowlist);
+                for(int i=0;i<50;i++){
+                    cout<<"=";
+                }
+                cout<<endl<<endl;
+                break;
+            }
+            case 4:{
+                string bBook,name,id;
+                int numberOfBooks;
+                cout<<"Nhap so luong sach muon tra:";
+                cin>>numberOfBooks;
+                cin.ignore();
+                cout<<"Nhap ten nguoi muon:";
+                getline(cin,name);
+                cout<<"Nhap id nguoi muon:";
+                getline(cin,id);
+                for(int i=0;i<numberOfBooks;i++){
+                cout<<"Nhap sach muon tra:";
+                getline(cin,bBook);
+                bool check = removeQueue(Borrowlist,bBook,name,id);
+                if(check){
+                    Book* found=lib.findBook(bBook);
+                    if(found){
+                        found->increaseNumberOfBooks();
+                    }
+                }
+                }
+                break;
+            }
+            case 5:{
+                cin.ignore();
+                cout <<"Nhap ten tac gia: ";
+                string authorName;
+                getline(cin, authorName);
+                timKiem.searching(authorName);
+                break;
+            }
+            case 6: {
                 Thuvien.sortByPublicYear();
                 cout<<"Hoan thanh sap xep \n";
                 break;
             }
-            case 6: {
+            case 7: {
                 Thuvien.display();
                 cout << endl;
                 break;
